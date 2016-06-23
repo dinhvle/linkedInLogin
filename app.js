@@ -2,7 +2,7 @@ var express = require('express');
 var path = require('path');
 var cookieSession = require('cookie-session');
 var passport = require('passport');
-var LinkedInStrategy = require('passport-linkedin').Strategy;
+var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -50,19 +50,25 @@ passport.deserializeUser(function(obj, done) {
 });
 
 passport.use(new LinkedInStrategy({
-    consumerKey: process.env['LINKEDIN_API_KEY'],
-    consumerSecret: process.env['LINKEDIN_SECRET_KEY'],
+    clientID: process.env['LINKEDIN_API_KEY'],
+    clientSecret: process.env['LINKEDIN_SECRET_KEY'],
     callbackURL: process.env.HOST + "/auth/linkedin/callback",
     scope: ['r_emailaddress', 'r_basicprofile'],
+    state: true
   },
-  function(token, tokenSecret, profile, done) {
+  function(accessToken, refreshToken, profile, done) {
 
       // To keep the example simple, the user's LinkedIn profile is returned to
       // represent the logged-in user.  In a typical application, you would want
       // to associate the LinkedIn account with a user record in your database,
       // and return that user instead (so perform a knex query here later.)
-      return done(null, profile);
+      done(null, {profile: profile, token: accessToken});
 }));
+// middleware that will set the user local variable in all views:
+app.use(function (req, res, next) {
+  res.locals.user = req.user;
+  next();
+})
 
 app.use('/auth', auth);
 app.use('/', routes);

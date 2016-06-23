@@ -6,6 +6,17 @@
   </head>
   <body>
     <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+    <% if(user) { %>
+      <p>Hello <%= user.profile.displayName %></p>
+      <img src="<%= user.profile.photos[0].value %>" alt="" />
+      <p>
+        <a href="/auth/logout">Logout</a>
+      </p>
+      <% } else { %>
+        <a href="/auth/linkedin">Login</a>
+    <% } %>
+
+
+
   </body>
 </html>
