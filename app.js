@@ -3,6 +3,7 @@ var path = require('path');
 var cookieSession = require('cookie-session');
 var passport = require('passport');
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+var TwitterStrategy = require('passport-twitter').Strategy;
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -64,6 +65,17 @@ passport.use(new LinkedInStrategy({
       // and return that user instead (so perform a knex query here later.)
       done(null, {profile: profile, token: accessToken});
 }));
+
+passport.use(new TwitterStrategy({
+    consumerKey: process.env.TWITTER_CONSUMER_KEY,
+    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+    callbackURL: process.env.HOST + "/auth/twitter/callback",
+  },
+  function(token, tokenSecret, profile, cb) {
+      cb(null, {profile: profile, token: token});
+  }
+));
+
 // middleware that will set the user local variable in all views:
 app.use(function (req, res, next) {
   res.locals.user = req.user;
